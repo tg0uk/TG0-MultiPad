@@ -1,11 +1,36 @@
-# TG0 Multipad ROS Driver
+<div align="center">
+  <img src="assets/tg0-logo.png" alt="TG0" width="220">
 
-ROS 2 Humble driver and message package for TG0 multipad RAW sensor streams.
+  <h1>TG0 MultiPad ROS Driver</h1>
 
-This release provides protocol-level access to the hardware stream. It decodes
-validated ADDA frames and publishes them as ROS messages so customers can build
-their own topology mapping, calibration, filtering, and application logic on top
-of the RAW data.
+  <p>
+    ROS 2 RAW data driver and visualization examples for TG0 MultiPad sensors.
+  </p>
+
+  <p>
+    <img alt="ROS 2 Humble" src="https://img.shields.io/badge/ROS%202-Humble-22314E">
+    <img alt="Ubuntu 22.04" src="https://img.shields.io/badge/Ubuntu-22.04%20LTS-E95420">
+    <img alt="Jetson" src="https://img.shields.io/badge/NVIDIA-Jetson-76B900">
+    <img alt="Status" src="https://img.shields.io/badge/status-RAW%20driver%20ready-2E7D32">
+  </p>
+
+  <p>
+    <a href="README.md">English</a> | <a href="README.zh-CN.md">中文</a>
+  </p>
+</div>
+
+---
+
+## Overview
+
+TG0 MultiPad ROS Driver provides protocol-level access to TG0 MultiPad RAW
+sensor streams. It decodes validated ADDA frames and publishes them as ROS 2
+messages so integrators can build topology mapping, calibration, filtering, and
+application logic on top of the RAW data.
+
+This release is intentionally close to the hardware protocol. It is suitable for
+customers who want a stable ROS entry point while keeping product-specific
+mapping and signal processing under their own control.
 
 ## Supported Environment
 
@@ -20,9 +45,27 @@ This release is developed and validated with:
 `rqt_plot` is only required for the optional visualization example. Other Ubuntu
 or ROS 2 versions are outside the validated release scope.
 
+## Repository Layout
+
+```text
+.
+├── assets/
+│   └── tg0-logo.png
+├── scripts/
+│   └── helper scripts for validation and hardware bring-up
+└── src/
+    ├── tg0_multipad_driver/
+    │   ├── examples/
+    │   ├── include/
+    │   ├── src/
+    │   └── test/
+    └── tg0_multipad_msgs/
+        └── msg/RawFrame.msg
+```
+
 ## Packages
 
-- `tg0_multipad_msgs`: ROS interfaces for TG0 multipad streams.
+- `tg0_multipad_msgs`: ROS interfaces for TG0 MultiPad streams.
 - `tg0_multipad_driver`: RAW frame parser, serial/file publisher, diagnostics,
   and visualization examples.
 
@@ -204,7 +247,7 @@ xhost +local:root
 
 ## Diagnostics
 
-The RAW publisher also reports runtime health on:
+The RAW publisher reports runtime health on:
 
 ```text
 /diagnostics
