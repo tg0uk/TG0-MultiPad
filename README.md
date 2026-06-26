@@ -201,6 +201,11 @@ Plotting the high-rate `RawFrame` message directly can be heavy. The driver
 therefore includes an example bridge that republishes downsampled scalar topics
 for `rqt_plot`.
 
+`rqt_plot` is intended for short interactive inspection, not long-running
+stability tests. High-rate RAW visualization can accumulate plot history and
+increase CPU and memory load over time, especially on Jetson-class devices.
+Use the diagnostics-only procedure below for stability testing.
+
 Start the RAW publisher first, then run the plot-channel bridge:
 
 ```bash
@@ -281,8 +286,11 @@ Inspect diagnostics with:
 ros2 topic echo /diagnostics
 ```
 
-For long stability runs, avoid unnecessary full-rate RAW subscribers. If only
-driver health is needed, disable RAW publication and monitor diagnostics:
+## Long-Running Stability Tests
+
+For long stability runs, avoid `rqt_plot`, `ros2 topic echo` on
+`/tg0/multipad/raw`, and other full-rate RAW subscribers. Keep the parser and
+diagnostics active while disabling RAW publication:
 
 ```bash
 ros2 run tg0_multipad_driver tg0_multipad_raw_publisher --ros-args \
@@ -290,6 +298,20 @@ ros2 run tg0_multipad_driver tg0_multipad_raw_publisher --ros-args \
   -p baud_rate:=12000000 \
   -p publish_raw:=false
 ```
+
+Monitor `/diagnostics` during the run and record:
+
+- `total_frames` and `sample_count` keep increasing.
+- `frame_rate_hz` and `bytes_per_sec` stay stable for the hardware setup.
+- `crc_errors` and `resync_count` stay within the expected test threshold.
+- `serial_open` remains `true`.
+- `last_error_text` remains empty.
+
+Recommended sequence:
+
+- 10 minutes: bring-up check after wiring or software changes.
+- 2 hours: engineering stability check before demos or customer handoff.
+- 24 hours: extended soak test for release or platform qualification.
 
 ## Publisher Parameters
 

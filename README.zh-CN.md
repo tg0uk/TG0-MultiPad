@@ -194,6 +194,10 @@ uint64 device_timestamp_ms
 直接绘制高频 `RawFrame` message 可能比较重。本驱动提供了一个 example bridge，
 将 RAW payload 以降频后的 scalar topic 重新发布，方便使用 `rqt_plot` 查看。
 
+`rqt_plot` 用于短时间交互式观察，不作为长时间稳定性测试工具。高频 RAW 可视化会
+随时间积累绘图历史，并增加 CPU 和内存负载，在 Jetson 等嵌入式设备上尤其明显。
+长测请使用下方 diagnostics-only 流程。
+
 先启动 RAW publisher，然后启动 plot-channel bridge：
 
 ```bash
@@ -272,8 +276,11 @@ tg0_multipad/raw_stream
 ros2 topic echo /diagnostics
 ```
 
-长时间稳定性观察时，应避免不必要的全速 RAW subscriber。如果只需要查看驱动健康
-状态，可以关闭 RAW 发布，只监控 diagnostics：
+## 长时间稳定性测试
+
+长时间稳定性测试时，避免使用 `rqt_plot`、对 `/tg0/multipad/raw` 执行
+`ros2 topic echo`，以及其他全速 RAW subscriber。应保持 parser 与 diagnostics
+运行，同时关闭 RAW 发布：
 
 ```bash
 ros2 run tg0_multipad_driver tg0_multipad_raw_publisher --ros-args \
@@ -281,6 +288,20 @@ ros2 run tg0_multipad_driver tg0_multipad_raw_publisher --ros-args \
   -p baud_rate:=12000000 \
   -p publish_raw:=false
 ```
+
+测试过程中监控 `/diagnostics`，并记录：
+
+- `total_frames` 和 `sample_count` 持续增长。
+- `frame_rate_hz` 和 `bytes_per_sec` 在当前硬件环境下保持稳定。
+- `crc_errors` 和 `resync_count` 保持在测试阈值内。
+- `serial_open` 保持 `true`。
+- `last_error_text` 保持为空。
+
+推荐顺序：
+
+- 10 分钟：用于接线、环境或软件改动后的 bring-up 检查。
+- 2 小时：用于 demo 或客户交付前的工程稳定性检查。
+- 24 小时：用于 release 或平台认证的长时间 soak test。
 
 ## Publisher 参数
 
